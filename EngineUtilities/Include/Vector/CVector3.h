@@ -1,5 +1,4 @@
 // CVector3.h - Vector 3D con operaciones básicas y utilidades
-// Autor: David Sánchez 
 
 #pragma once
 #include "../Utilities/EngineMath.h"

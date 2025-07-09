@@ -1,5 +1,5 @@
 // CVector4.h - Vector 4D con operaciones básicas y utilidades
-// Autor: David Sánchez 
+
 
 #pragma once
 #include "../Utilities/EngineMath.h"

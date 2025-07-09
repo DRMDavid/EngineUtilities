@@ -1,5 +1,5 @@
 ﻿// CVector2.h - Vector 2D con operaciones básicas y utilidades
-// Autor: David Sánchez 
+
 
 #pragma once
 #include "../Utilities/EngineMath.h"
