@@ -1,141 +1,105 @@
-#pragma once
+// CVector3.h - Vector 3D con operaciones básicas y utilidades
+// Autor: David Sánchez 
 
+#pragma once
 #include "../Utilities/EngineMath.h"
 #include <ostream>
 
+/// Clase para representar un vector en 3D con operaciones matemáticas comunes.
 class CVector3 {
 public:
   float x, y, z;
 
+  /// Constructor por defecto. Inicializa el vector en (0, 0, 0).
   CVector3() : x(0), y(0), z(0) {}
 
+  /// Constructor con valores personalizados.
+  /// @param x Valor en el eje X.
+  /// @param y Valor en el eje Y.
+  /// @param z Valor en el eje Z.
   CVector3(float x, float y, float z) : x(x), y(y), z(z) {}
 
-  CVector3 
-  operator+(const CVector3& other) const {
-    return CVector3(x + other.x, y + other.y, z + other.z);
-  }
+  // --- Operadores aritméticos ---
 
-  CVector3 
-  operator-(const CVector3& other) const {
-    return CVector3(x - other.x, y - other.y, z - other.z);
-  }
+  /// Suma dos vectores.
+  CVector3 operator+(const CVector3& other) const;
 
-  CVector3 
-  operator*(float scalar) const {
-    return CVector3(x * scalar, y * scalar, z * scalar);
-  }
+  /// Resta dos vectores.
+  CVector3 operator-(const CVector3& other) const;
 
-  CVector3 
-  operator/(float scalar) const {
-    return CVector3(x / scalar, y / scalar, z / scalar);
-  }
+  /// Multiplica el vector por un escalar.
+  CVector3 operator*(float scalar) const;
 
-  CVector3& 
-  operator+=(const CVector3& other) {
-    x += other.x; y += other.y; z += other.z;
-    return *this;
-  }
+  /// Divide el vector entre un escalar.
+  CVector3 operator/(float scalar) const;
 
-  CVector3& 
-  operator-=(const CVector3& other) {
-    x -= other.x; y -= other.y; z -= other.z;
-    return *this;
-  }
+  // --- Asignaciones compuestas ---
 
-  CVector3& 
-  operator*=(float scalar) {
-    x *= scalar; y *= scalar; z *= scalar;
-    return *this;
-  }
+  /// Suma otro vector al actual.
+  CVector3& operator+=(const CVector3& other);
 
-  CVector3& 
-  operator/=(float scalar) {
-    x /= scalar; y /= scalar; z /= scalar;
-    return *this;
-  }
+  /// Resta otro vector al actual.
+  CVector3& operator-=(const CVector3& other);
 
-  bool 
-  operator==(const CVector3& other) const {
-    return EngineMathLib::approxEqual(x, other.x) &&
-      EngineMathLib::approxEqual(y, other.y) &&
-      EngineMathLib::approxEqual(z, other.z);
-  }
+  /// Multiplica el vector actual por un escalar.
+  CVector3& operator*=(float scalar);
 
-  bool 
-  operator!=(const CVector3& other) const {
-    return !(*this == other);
-  }
+  /// Divide el vector actual entre un escalar.
+  CVector3& operator/=(float scalar);
 
-  float& 
-  operator[](int index) {
-    return (index == 0) ? x : (index == 1) ? y : z;
-  }
+  // --- Comparaciones ---
 
-  const float& 
-  operator[](int index) const {
-    return (index == 0) ? x : (index == 1) ? y : z;
-  }
+  /// Compara si dos vectores son aproximadamente iguales.
+  bool operator==(const CVector3& other) const;
 
-  float
-  lengthSquare() const {
-    return x * x + y * y + z * z;
-  }
+  /// Compara si dos vectores son diferentes.
+  bool operator!=(const CVector3& other) const;
 
-  float 
-  length() const {
-    return (float)EngineMathLib::sqrt(lengthSquare());
-  }
+  // --- Acceso por índice ---
 
-  float
-  dot(const CVector3& other) const {
-    return x * other.x + y * other.y + z * other.z;
-  }
+  /// Accede a una componente por índice (0: X, 1: Y, 2: Z).
+  float& operator[](int index);
 
-  CVector3 
-  cross(const CVector3& other) const {
-    return CVector3(
-      y * other.z - z * other.y,
-      z * other.x - x * other.z,
-      x * other.y - y * other.x
-    );
-  }
+  /// Accede a una componente por índice (0: X, 1: Y, 2: Z) (versión constante).
+  const float& operator[](int index) const;
 
-  CVector3 
-  normalized() const {
-    float len = length();
-    return (len == 0.f) ? CVector3(0.f, 0.f, 0.f) : (*this) / len;
-  }
+  // --- Magnitud y operaciones vectoriales ---
 
-  void 
-  normalize() {
-    float len = length();
-    if (len != 0.f) {
-      x /= len; y /= len; z /= len;
-    }
-    else {
-      x = y = z = 0.f;
-    }
-  }
+  /// Retorna la longitud al cuadrado del vector.
+  float lengthSquare() const;
 
-  static float distance(const CVector3& a, const CVector3& b) {
-    return (b - a).length();
-  }
+  /// Retorna la magnitud (longitud) del vector.
+  float length() const;
 
-  static CVector3 lerp(const CVector3& a, const CVector3& b, float t) {
-    return a + (b - a) * t;
-  }
+  /// Calcula el producto punto entre dos vectores.
+  float dot(const CVector3& other) const;
 
-  static CVector3 zero() {
-    return CVector3(0.f, 0.f, 0.f);
-  }
+  /// Calcula el producto cruzado entre dos vectores.
+  CVector3 cross(const CVector3& other) const;
 
-  static CVector3 one() {
-    return CVector3(1.f, 1.f, 1.f);
-  }
+  /// Retorna una copia normalizada del vector (longitud = 1).
+  CVector3 normalized() const;
 
-  friend std::ostream& operator<<(std::ostream& os, const CVector3& v) {
-    os << "CVector3(" << v.x << ", " << v.y << ", " << v.z << ")";
-    return os;
-  }
+  /// Normaliza el vector actual (lo convierte en unitario).
+  void normalize();
+
+  // --- Funciones estáticas ---
+
+  /// Calcula la distancia entre dos vectores.
+  static float distance(const CVector3& a, const CVector3& b);
+
+  /// Realiza una interpolación lineal entre dos vectores.
+  /// @param t Valor entre 0 y 1.
+  static CVector3 lerp(const CVector3& a, const CVector3& b, float t);
+
+  /// Retorna el vector (0, 0, 0).
+  static CVector3 zero();
+
+  /// Retorna el vector (1, 1, 1).
+  static CVector3 one();
+
+  // --- Impresión del vector ---
+
+  /// Imprime el vector en consola en formato CVector3(x, y, z).
+  friend std::ostream& operator<<(std::ostream& os, const CVector3& v);
 };

@@ -1,5 +1,5 @@
 // CQuaternion.h - Cuaternión para rotaciones en 3D
-// Autor: David Sánchez | Fecha: [Fecha de creación]
+// Autor: David Sánchez 
 
 #pragma once
 

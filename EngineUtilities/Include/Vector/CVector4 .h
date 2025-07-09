@@ -1,125 +1,103 @@
-#pragma once
+// CVector4.h - Vector 4D con operaciones básicas y utilidades
+// Autor: David Sánchez 
 
+#pragma once
 #include "../Utilities/EngineMath.h"
 #include <ostream>
 
+/// Clase para representar un vector en 4D con operaciones matemáticas comunes.
 class CVector4 {
 public:
   float x, y, z, w;
 
+  /// Constructor por defecto. Inicializa el vector en (0, 0, 0, 0).
   CVector4() : x(0), y(0), z(0), w(0) {}
+
+  /// Constructor con valores personalizados.
+  /// @param x Valor en el eje X.
+  /// @param y Valor en el eje Y.
+  /// @param z Valor en el eje Z.
+  /// @param w Valor en el eje W.
   CVector4(float x, float y, float z, float w) : x(x), y(y), z(z), w(w) {}
 
-  CVector4 operator+(const CVector4& other) const {
-    return CVector4(x + other.x, y + other.y, z + other.z, w + other.w);
-  }
+  // --- Operadores aritméticos ---
 
-  CVector4 operator-(const CVector4& other) const {
-    return CVector4(x - other.x, y - other.y, z - other.z, w - other.w);
-  }
+  /// Suma dos vectores.
+  CVector4 operator+(const CVector4& other) const;
 
-  CVector4 operator*(float scalar) const {
-    return CVector4(x * scalar, y * scalar, z * scalar, w * scalar);
-  }
+  /// Resta dos vectores.
+  CVector4 operator-(const CVector4& other) const;
 
-  CVector4 operator/(float scalar) const {
-    return CVector4(x / scalar, y / scalar, z / scalar, w / scalar);
-  }
+  /// Multiplica el vector por un escalar.
+  CVector4 operator*(float scalar) const;
 
-  CVector4& operator+=(const CVector4& other) {
-    x += other.x; y += other.y; z += other.z; w += other.w;
-    return *this;
-  }
+  /// Divide el vector entre un escalar.
+  CVector4 operator/(float scalar) const;
 
-  CVector4& operator-=(const CVector4& other) {
-    x -= other.x; y -= other.y; z -= other.z; w -= other.w;
-    return *this;
-  }
+  // --- Asignaciones compuestas ---
 
-  CVector4& operator*=(float scalar) {
-    x *= scalar; y *= scalar; z *= scalar; w *= scalar;
-    return *this;
-  }
+  /// Suma otro vector al actual.
+  CVector4& operator+=(const CVector4& other);
 
-  CVector4& operator/=(float scalar) {
-    x /= scalar; y /= scalar; z /= scalar; w /= scalar;
-    return *this;
-  }
+  /// Resta otro vector al actual.
+  CVector4& operator-=(const CVector4& other);
 
-  bool operator==(const CVector4& other) const {
-    return EngineMathLib::approxEqual(x, other.x) &&
-      EngineMathLib::approxEqual(y, other.y) &&
-      EngineMathLib::approxEqual(z, other.z) &&
-      EngineMathLib::approxEqual(w, other.w);
-  }
+  /// Multiplica el vector actual por un escalar.
+  CVector4& operator*=(float scalar);
 
-  bool operator!=(const CVector4& other) const {
-    return !(*this == other);
-  }
+  /// Divide el vector actual entre un escalar.
+  CVector4& operator/=(float scalar);
 
-  float& operator[](int index) {
-    switch (index) {
-    case 0: return x;
-    case 1: return y;
-    case 2: return z;
-    default: return w;
-    }
-  }
+  // --- Comparaciones ---
 
-  const float& operator[](int index) const {
-    switch (index) {
-    case 0: return x;
-    case 1: return y;
-    case 2: return z;
-    default: return w;
-    }
-  }
+  /// Compara si dos vectores son aproximadamente iguales.
+  bool operator==(const CVector4& other) const;
 
-  float lengthSquare() const {
-    return x * x + y * y + z * z + w * w;
-  }
+  /// Compara si dos vectores son diferentes.
+  bool operator!=(const CVector4& other) const;
 
-  float length() const {
-    return (float)EngineMathLib::sqrt(lengthSquare());
-  }
+  // --- Acceso por índice ---
 
-  float dot(const CVector4& other) const {
-    return x * other.x + y * other.y + z * other.z + w * other.w;
-  }
+  /// Accede a una componente por índice (0: X, 1: Y, 2: Z, 3: W).
+  float& operator[](int index);
 
-  CVector4 normalized() const {
-    float len = length();
-    return (len == 0.f) ? CVector4(0.f, 0.f, 0.f, 0.f) : (*this) / len;
-  }
+  /// Accede a una componente por índice (0: X, 1: Y, 2: Z, 3: W) (versión constante).
+  const float& operator[](int index) const;
 
-  void normalize() {
-    float len = length();
-    if (len != 0.f) {
-      x /= len; y /= len; z /= len; w /= len;
-    }
-    else {
-      x = y = z = w = 0.f;
-    }
-  }
+  // --- Magnitud y operaciones vectoriales ---
 
-  inline static float distance(const CVector4& a, const CVector4& b) {
-    return (b - a).length();
-  }
+  /// Retorna la longitud al cuadrado del vector.
+  float lengthSquare() const;
 
-  inline static CVector4 lerp(const CVector4& a, const CVector4& b, float t) {
-    return a + (b - a) * t;
-  }
+  /// Retorna la magnitud (longitud) del vector.
+  float length() const;
 
-  inline static CVector4 zero() {
-    return CVector4(0.f, 0.f, 0.f, 0.f);
-  }
+  /// Calcula el producto punto entre dos vectores.
+  float dot(const CVector4& other) const;
 
-  inline static CVector4 one() {
-    return CVector4(1.f, 1.f, 1.f, 1.f);
-  }
+  /// Retorna una copia normalizada del vector (longitud = 1).
+  CVector4 normalized() const;
 
-  friend std::ostream& operator<<(std::ostream& os, const CVector4& v) {
-    os << "CVector4(" << v.x << ", " << v.y << ", " << v.z << ", " << v.w << ")";
-    return os;
-  }
+  /// Normaliza el vector actual (lo convierte en unitario).
+  void normalize();
+
+  // --- Funciones estáticas ---
+
+  /// Calcula la distancia entre dos vectores.
+  static float distance(const CVector4& a, const CVector4& b);
+
+  /// Realiza una interpolación lineal entre dos vectores.
+  /// @param t Valor entre 0 y 1.
+  static CVector4 lerp(const CVector4& a, const CVector4& b, float t);
+
+  /// Retorna el vector (0, 0, 0, 0).
+  static CVector4 zero();
+
+  /// Retorna el vector (1, 1, 1, 1).
+  static CVector4 one();
+
+  // --- Impresión del vector ---
+
+  /// Imprime el vector en consola en formato CVector4(x, y, z, w).
+  friend std::ostream& operator<<(std::ostream& os, const CVector4& v);
 };
