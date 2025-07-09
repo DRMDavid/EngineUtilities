@@ -1,167 +1,70 @@
+// CQuaternion.h - Cuaternión para rotaciones en 3D
+// Autor: David Sánchez | Fecha: [Fecha de creación]
+
 #pragma once
 
 #include "../Utilities/EngineMath.h"
-#include "Cvector3.h"
+#include "CVector3.h"
 
-/**
- * @class CQuaternion
- * @brief Represents a quaternion used for 3D rotations.
- */
+/// Clase que representa un cuaternión, útil para rotaciones en 3D sin gimbal lock.
 class CQuaternion {
 public:
   float x, y, z, w;
 
-  /**
-   * @brief Default constructor initializes to identity quaternion.
-   */
+  /// Constructor por defecto. Inicializa como cuaternión identidad.
   CQuaternion() : x(0), y(0), z(0), w(1) {}
 
-  /**
-   * @brief Parameterized constructor.
-   * @param x X component.
-   * @param y Y component.
-   * @param z Z component.
-   * @param w W component.
-   */
+  /// Constructor con valores personalizados.
+  /// @param x Componente X.
+  /// @param y Componente Y.
+  /// @param z Componente Z.
+  /// @param w Componente W.
   CQuaternion(float x, float y, float z, float w) : x(x), y(y), z(z), w(w) {}
 
-  /**
-   * @brief Quaternion multiplication.
-   * @param q Another quaternion.
-   * @return Result of quaternion multiplication.
-   */
-  CQuaternion operator*(const CQuaternion& q) const {
-    return CQuaternion(
-      w * q.x + x * q.w + y * q.z - z * q.y,
-      w * q.y - x * q.z + y * q.w + z * q.x,
-      w * q.z + x * q.y - y * q.x + z * q.w,
-      w * q.w - x * q.x - y * q.y - z * q.z
-    );
-  }
+  // --- Operaciones básicas ---
 
-  /**
-   * @brief Scalar multiplication.
-   * @param scalar Scalar value.
-   * @return Scaled quaternion.
-   */
-  CQuaternion operator*(float scalar) const {
-    return CQuaternion(x * scalar, y * scalar, z * scalar, w * scalar);
-  }
+  /// Multiplicación entre cuaterniones.
+  CQuaternion operator*(const CQuaternion& q) const;
 
-  /**
-   * @brief Quaternion addition.
-   * @param q Another quaternion.
-   * @return Sum of quaternions.
-   */
-  CQuaternion operator+(const CQuaternion& q) const {
-    return CQuaternion(x + q.x, y + q.y, z + q.z, w + q.w);
-  }
+  /// Multiplicación por un escalar.
+  CQuaternion operator*(float escalar) const;
 
-  /**
-   * @brief Quaternion subtraction.
-   * @param q Another quaternion.
-   * @return Difference of quaternions.
-   */
-  CQuaternion operator-(const CQuaternion& q) const {
-    return CQuaternion(x - q.x, y - q.y, z - q.z, w - q.w);
-  }
+  /// Suma de cuaterniones.
+  CQuaternion operator+(const CQuaternion& q) const;
 
-  /**
-   * @brief Normalizes the quaternion in-place.
-   */
-  void normalize() {
-    float mag = EngineMathLib::sqrt(x * x + y * y + z * z + w * w);
-    if (mag > 0.0f) {
-      x /= mag;
-      y /= mag;
-      z /= mag;
-      w /= mag;
-    }
-  }
+  /// Resta de cuaterniones.
+  CQuaternion operator-(const CQuaternion& q) const;
 
-  /**
-   * @brief Returns a normalized copy of the quaternion.
-   * @return Normalized quaternion.
-   */
-  CQuaternion normalized() const {
-    CQuaternion q = *this;
-    q.normalize();
-    return q;
-  }
+  // --- Métodos de normalización ---
 
-  /**
-   * @brief Returns the conjugate of the quaternion.
-   * @return Conjugated quaternion.
-   */
-  CQuaternion conjugate() const {
-    return CQuaternion(-x, -y, -z, w);
-  }
+  /// Normaliza el cuaternión actual (modifica el objeto).
+  void normalize();
 
-  /**
-   * @brief Rotates a 3D vector by this quaternion.
-   * @param v The vector to rotate.
-   * @return Rotated vector.
-   */
-  CVector3 rotate(const CVector3& v) const {
-    CQuaternion vecQuat(v.x, v.y, v.z, 0.0f);
-    CQuaternion resQuat = (*this) * vecQuat * conjugate();
-    return CVector3(resQuat.x, resQuat.y, resQuat.z);
-  }
+  /// Retorna una copia normalizada del cuaternión.
+  CQuaternion normalized() const;
 
-  /**
-   * @brief Creates a quaternion from an axis and angle.
-   * @param axis Axis of rotation (must be normalized).
-   * @param angleRad Angle in radians.
-   * @return Quaternion representing the rotation.
-   */
-  static CQuaternion fromAxisAngle(const CVector3& axis, float angleRad) {
-    float halfAngle = angleRad * 0.5f;
-    float s = EngineMathLib::sin(halfAngle);
-    float c = EngineMathLib::cos(halfAngle);
-    return CQuaternion(axis.x * s, axis.y * s, axis.z * s, c);
-  }
+  // --- Otras operaciones ---
 
-  /**
-   * @brief Performs spherical linear interpolation (SLERP) between two quaternions.
-   * @param a Start quaternion.
-   * @param b End quaternion.
-   * @param t Interpolation factor [0, 1].
-   * @return Interpolated quaternion.
-   */
-  static CQuaternion slerp(const CQuaternion& a, const CQuaternion& b, float t) {
-    float dot = a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w;
+  /// Retorna el conjugado del cuaternión.
+  CQuaternion conjugate() const;
 
-    CQuaternion bAdjusted = b;
+  /// Rota un vector 3D usando el cuaternión actual.
+  CVector3 rotate(const CVector3& v) const;
 
-    if (dot < 0.0f) {
-      dot = -dot;
-      bAdjusted = b * -1.0f;
-    }
+  // --- Métodos estáticos ---
 
-    if (dot > 0.9995f) {
-      return (a + (bAdjusted  - a) * t).normalized();
-    }
+  /// Crea un cuaternión a partir de un eje y un ángulo (en radianes).
+  /// El eje debe estar normalizado.
+  static CQuaternion fromAxisAngle(const CVector3& eje, float anguloRad);
 
-    float theta_0 = EngineMathLib::acos(dot);
-    float theta = theta_0 * t;
+  /// Interpolación esférica (SLERP) entre dos cuaterniones.
+  /// @param a Cuaternión inicial.
+  /// @param b Cuaternión final.
+  /// @param t Valor de interpolación (entre 0 y 1).
+  static CQuaternion slerp(const CQuaternion& a, const CQuaternion& b, float t);
 
-    float sin_theta = EngineMathLib::sin(theta);
-    float sin_theta_0 = EngineMathLib::sin(theta_0);
+  // --- Impresión ---
 
-    float s0 = EngineMathLib::cos(theta) - dot * sin_theta / sin_theta_0;
-    float s1 = sin_theta / sin_theta_0;
-
-    return (a * s0 + bAdjusted * s1).normalized();
-  }
-
-  /**
-   * @brief Outputs the quaternion to a stream.
-   * @param os Output stream.
-   * @param q Quaternion to output.
-   * @return Output stream.
-   */
-  friend std::ostream& operator<<(std::ostream& os, const CQuaternion& q) {
-    os << "CQuaternion(" << q.x << ", " << q.y << ", " << q.z << ", " << q.w << ")";
-    return os;
-  }
+  /// Imprime el cuaternión en consola con el formato CQuaternion(x, y, z, w).
+  friend std::ostream& operator<<(std::ostream& os, const CQuaternion& q);
 };
