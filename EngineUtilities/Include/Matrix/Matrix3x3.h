@@ -1,4 +1,4 @@
-#pragma once
+Ôªø#pragma once
 #include "../Utilities/EngineMath.h"
 #include <iostream>
 
@@ -6,23 +6,28 @@ namespace EngineMathLib {
 
   /**
    * @class Matrix3x3
-   * @brief Representa una matriz 3x3 para transformaciones en 2D y 3D.
+   * @brief Representa una matriz 3x3 para transformaciones y operaciones en 2D y 3D.
    *
-   * Permite realizar operaciones como suma, resta, multiplicaciÛn
-   * entre matrices y con escalares, transposiciÛn, determinante,
-   * inversa y construcciÛn de matrices especiales de escalado y rotaciÛn.
+   * Proporciona operaciones b√°sicas de matrices:
+   * - Construcci√≥n de matrices identidad, escala y rotaci√≥n.
+   * - Operaciones aritm√©ticas (suma, resta, multiplicaci√≥n y divisi√≥n por escalar).
+   * - C√°lculo de determinante, transpuesta e inversa.
+   * - Comparaci√≥n con tolerancia a errores num√©ricos.
+   * - Acceso mediante √≠ndice lineal.
    */
   class Matrix3x3 {
   public:
-    double m[3][3];  ///< Elementos de la matriz, accesibles por Ìndices [fila][columna]
+    /// Elementos accesibles como m[fila][columna]
+    double m[3][3];
 
-    // --- Constructores ---
+    /// Constructor por defecto que crea matriz identidad
     Matrix3x3() {
       for (int i = 0; i < 3; ++i)
         for (int j = 0; j < 3; ++j)
           m[i][j] = (i == j) ? 1.0 : 0.0;
     }
 
+    /// Constructor con valores expl√≠citos para cada elemento
     Matrix3x3(double a00, double a01, double a02,
       double a10, double a11, double a12,
       double a20, double a21, double a22) {
@@ -31,13 +36,23 @@ namespace EngineMathLib {
       m[2][0] = a20; m[2][1] = a21; m[2][2] = a22;
     }
 
-    // --- Constructores est·ticos ---
+    /**
+     * @brief Crea matriz de escala 2D con factores sx y sy.
+     * @param sx Factor escala en X.
+     * @param sy Factor escala en Y.
+     * @return Matriz3x3 de escala.
+     */
     static Matrix3x3 Escalar(double sx, double sy) {
       return Matrix3x3(sx, 0, 0,
         0, sy, 0,
         0, 0, 1);
     }
 
+    /**
+     * @brief Crea matriz de rotaci√≥n 2D para √°ngulo en radianes.
+     * @param angulo √Ångulo de rotaci√≥n (radianes).
+     * @return Matriz3x3 de rotaci√≥n.
+     */
     static Matrix3x3 Rotar(double angulo) {
       double c = EngineMathLib::coseno(angulo);
       double s = EngineMathLib::seno(angulo);
@@ -46,51 +61,52 @@ namespace EngineMathLib {
         0, 0, 1);
     }
 
-    // --- Acceso por Ìndice ---
     /**
-     * @brief Acceso mutable a elementos usando Ìndices planos 0..8.
-     * @param index Õndice en rango [0..8].
+     * @brief Acceso mutable a elemento usando √≠ndice lineal 0..8.
+     * @param index √çndice del elemento (0 a 8).
      * @return Referencia al elemento.
-     * @throws std::out_of_range si Ìndice inv·lido.
+     * @throws std::out_of_range si √≠ndice inv√°lido.
      */
     double& operator[](int index) {
       if (index < 0 || index >= 9)
-        throw std::out_of_range("Õndice fuera de rango Matrix3x3");
+        throw std::out_of_range("√çndice fuera de rango Matrix3x3");
       return m[index / 3][index % 3];
     }
 
     /**
-     * @brief Acceso constante a elementos usando Ìndices planos 0..8.
-     * @param index Õndice en rango [0..8].
+     * @brief Acceso constante a elemento usando √≠ndice lineal 0..8.
+     * @param index √çndice del elemento (0 a 8).
      * @return Referencia constante al elemento.
-     * @throws std::out_of_range si Ìndice inv·lido.
+     * @throws std::out_of_range si √≠ndice inv√°lido.
      */
     const double& operator[](int index) const {
       if (index < 0 || index >= 9)
-        throw std::out_of_range("Õndice fuera de rango Matrix3x3");
+        throw std::out_of_range("√çndice fuera de rango Matrix3x3");
       return m[index / 3][index % 3];
     }
 
-    // --- Operadores compuestos ---
+    /// Operador suma compuesta (+=)
     Matrix3x3& operator+=(const Matrix3x3& o) {
       for (int i = 0; i < 9; ++i)
         (*this)[i] += o[i];
       return *this;
     }
 
+    /// Operador resta compuesta (-=)
     Matrix3x3& operator-=(const Matrix3x3& o) {
       for (int i = 0; i < 9; ++i)
         (*this)[i] -= o[i];
       return *this;
     }
 
+    /// Multiplicaci√≥n compuesta por escalar (*=)
     Matrix3x3& operator*=(double s) {
       for (int i = 0; i < 9; ++i)
         (*this)[i] *= s;
       return *this;
     }
 
-    // --- MÈtodos existentes ---
+    /// Devuelve la matriz transpuesta (filas ‚Üî columnas)
     Matrix3x3 Transpuesta() const {
       Matrix3x3 r;
       for (int i = 0; i < 3; ++i)
@@ -99,20 +115,26 @@ namespace EngineMathLib {
       return r;
     }
 
+    /// Calcula el determinante de la matriz 3x3
     double Determinante() const {
       return m[0][0] * (m[1][1] * m[2][2] - m[1][2] * m[2][1])
         - m[0][1] * (m[1][0] * m[2][2] - m[1][2] * m[2][0])
         + m[0][2] * (m[1][0] * m[2][1] - m[1][1] * m[2][0]);
     }
 
+    /// Verifica si la matriz es invertible (determinante no nulo)
     bool isInvertible() const {
       return EngineMathLib::valorAbs(Determinante()) >= EngineMathLib::EPSILON;
     }
 
+    /**
+     * @brief Calcula la matriz inversa si existe.
+     * @return Matriz inversa o identidad si no es invertible.
+     */
     Matrix3x3 Inversa() const {
       double det = Determinante();
       if (EngineMathLib::valorAbs(det) < EngineMathLib::EPSILON)
-        return Matrix3x3();
+        return Matrix3x3(); // fallback identidad
 
       double inv = 1.0 / det;
       Matrix3x3 r;
@@ -132,7 +154,7 @@ namespace EngineMathLib {
       return r;
     }
 
-    // --- Operadores normales ---
+    /// Multiplicaci√≥n entre matrices
     Matrix3x3 operator*(const Matrix3x3& o) const {
       Matrix3x3 r;
       for (int i = 0; i < 3; ++i)
@@ -141,6 +163,7 @@ namespace EngineMathLib {
       return r;
     }
 
+    /// Suma entre matrices
     Matrix3x3 operator+(const Matrix3x3& o) const {
       Matrix3x3 r;
       for (int i = 0; i < 3; ++i)
@@ -149,6 +172,7 @@ namespace EngineMathLib {
       return r;
     }
 
+    /// Resta entre matrices
     Matrix3x3 operator-(const Matrix3x3& o) const {
       Matrix3x3 r;
       for (int i = 0; i < 3; ++i)
@@ -157,6 +181,7 @@ namespace EngineMathLib {
       return r;
     }
 
+    /// Multiplicaci√≥n por escalar
     Matrix3x3 operator*(double s) const {
       Matrix3x3 r;
       for (int i = 0; i < 3; ++i)
@@ -165,6 +190,11 @@ namespace EngineMathLib {
       return r;
     }
 
+    /**
+     * @brief Divisi√≥n por escalar con protecci√≥n contra divisi√≥n por cero.
+     * @param s Escalar divisor.
+     * @return Matriz dividida o identidad si s es cero.
+     */
     Matrix3x3 operator/(double s) const {
       if (EngineMathLib::valorAbs(s) < EngineMathLib::EPSILON)
         return Matrix3x3();
@@ -172,7 +202,7 @@ namespace EngineMathLib {
       return (*this) * inv;
     }
 
-    // --- Comparaciones ---
+    /// Comparaci√≥n con tolerancia EPSILON
     bool operator==(const Matrix3x3& o) const {
       for (int i = 0; i < 9; ++i)
         if (EngineMathLib::valorAbs((*this)[i] - o[i]) >= EngineMathLib::EPSILON)
@@ -180,11 +210,12 @@ namespace EngineMathLib {
       return true;
     }
 
+    /// Negaci√≥n de la comparaci√≥n ==
     bool operator!=(const Matrix3x3& o) const {
       return !(*this == o);
     }
 
-    // --- ImpresiÛn ---
+    /// Imprime la matriz en formato legible
     friend std::ostream& operator<<(std::ostream& os, const Matrix3x3& mat) {
       os << "[\n";
       for (int i = 0; i < 3; ++i) {
@@ -202,4 +233,4 @@ namespace EngineMathLib {
     }
   };
 
-} 
+}
