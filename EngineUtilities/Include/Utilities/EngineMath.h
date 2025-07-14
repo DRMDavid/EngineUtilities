@@ -1,20 +1,17 @@
-﻿// engine_mathlib_es.h
-// Biblioteca matemática básica para proyectos de ingeniería y videojuegos
-
-#pragma once
+﻿#pragma once
 
 namespace EngineMathLib {
 
   // Constantes matemáticas fundamentales
-  const double PI = 3.14159265358979323846;     // Número PI
-  const double EULER = 2.71828182845904523536;  // Número de Euler
-  const double EPSILON = 1e-6;                  // Tolerancia mínima para cálculos
+  constexpr double PI = 3.14159265358979323846;
+  constexpr double EULER = 2.71828182845904523536;
+  constexpr double EPSILON = 1e-6;
 
   // --- FUNCIONES BÁSICAS ---
 
-  /// Calcula la raíz cuadrada usando Newton-Raphson
   inline double raizCuadrada(double x) {
-    if (x < 0.0) return -1.0 / 0.0;
+    if (x < 0.0) return NAN;
+    if (x == 0.0) return 0.0;
     double estimacion = x / 2.0;
     for (int i = 0; i < 20; ++i) {
       estimacion = (estimacion + x / estimacion) / 2.0;
@@ -22,24 +19,21 @@ namespace EngineMathLib {
     return estimacion;
   }
 
-  /// Retorna el cuadrado de un número
   inline double cuadrado(double x) { return x * x; }
-
-  /// Retorna el cubo de un número
   inline double cubo(double x) { return x * x * x; }
 
-  /// Potencia base^exponente (aproximada)
   inline double potencia(double base, double exponente) {
-    if (base == 0.0 && exponente <= 0.0) return 0.0;
+    if (base == 0.0) {
+      if (exponente <= 0.0) return NAN;
+      return 0.0;
+    }
     if (exponente == 0.0) return 1.0;
-
-    bool negativo = exponente < 0.0;
-    exponente = negativo ? -exponente : exponente;
+    if (base < 0.0) return NAN;
 
     double resultado = 1.0;
     while (exponente >= 1.0) {
       resultado *= base;
-      --exponente;
+      exponente -= 1.0;
     }
 
     double fraccion = exponente;
@@ -48,46 +42,36 @@ namespace EngineMathLib {
       resultado *= parteFraccion;
     }
 
-    return negativo ? 1.0 / resultado : resultado;
+    return resultado;
   }
 
-  /// Valor absoluto
-  inline double valorAbs(double x) { return x < 0 ? -x : x; }
-
-  /// Máximo entre dos valores
+  inline double valorAbs(double x) { return x < 0.0 ? -x : x; }
   inline double maximo(double a, double b) { return a > b ? a : b; }
-
-  /// Mínimo entre dos valores
   inline double minimo(double a, double b) { return a < b ? a : b; }
 
-  /// Redondeo al entero más cercano
   inline int redondear(double x) {
-    return (x >= 0.0) ? int(x + 0.5) : int(x - 0.5);
+    return (x >= 0.0) ? static_cast<int>(x + 0.5) : static_cast<int>(x - 0.5);
   }
 
-  /// Piso: entero más pequeño <= x
   inline int piso(double x) {
-    int i = int(x);
+    int i = static_cast<int>(x);
     return (x < 0.0 && x != i) ? i - 1 : i;
   }
 
-  /// Techo: entero más grande >= x
   inline int techo(double x) {
-    int i = int(x);
+    int i = static_cast<int>(x);
     return (x > 0.0 && x != i) ? i + 1 : i;
   }
 
-  /// Valor absoluto en punto flotante
-  inline double absoluto(double x) { return x < 0 ? -x : x; }
+  inline double absoluto(double x) { return x < 0.0 ? -x : x; }
 
-  /// Módulo real entre a y b
   inline double modulo(double a, double b) {
+    if (b == 0.0) return NAN;
     while (a >= b) a -= b;
     while (a < 0) a += b;
     return a;
   }
 
-  /// Aproximación de la función exponencial (e^x)
   inline double exponencial(double x) {
     double resultado = 1.0;
     double termino = 1.0;
@@ -95,14 +79,14 @@ namespace EngineMathLib {
     while (absoluto(termino) > EPSILON) {
       termino *= x / n++;
       resultado += termino;
+      if (n > 1000) break;
     }
     return resultado;
   }
 
-  /// Aproximación del logaritmo natural
   inline double logNatural(double x) {
-    if (x <= 0) return -1.0 / 0.0;
-    double y = (x - 1) / (x + 1);
+    if (x <= 0.0) return NAN;
+    double y = (x - 1.0) / (x + 1.0);
     double suma = 0.0;
     double termino = y;
     int n = 1;
@@ -110,13 +94,13 @@ namespace EngineMathLib {
       suma += termino / (2 * n - 1);
       termino *= y * y;
       ++n;
+      if (n > 1000) break;
     }
-    return 2 * suma;
+    return 2.0 * suma;
   }
 
-  /// Logaritmo base 10
   inline double logBase10(double x) {
-    const double ln10 = 2.302585093;
+    constexpr double ln10 = 2.302585093;
     return logNatural(x) / ln10;
   }
 
@@ -138,6 +122,7 @@ namespace EngineMathLib {
       termino *= -x * x / ((2 * n) * (2 * n + 1));
       suma += termino;
       ++n;
+      if (n > 1000) break;
     }
     return suma;
   }
@@ -150,6 +135,7 @@ namespace EngineMathLib {
       termino *= -x * x / ((2 * n - 1) * (2 * n));
       suma += termino;
       ++n;
+      if (n > 1000) break;
     }
     return suma;
   }
@@ -157,11 +143,11 @@ namespace EngineMathLib {
   inline double tangente(double x) {
     double s = seno(x);
     double c = coseno(x);
-    return c != 0 ? s / c : 1.0 / 0.0;
+    return (c != 0.0) ? s / c : INFINITY;
   }
 
   inline double arcSeno(double x) {
-    if (x < -1 || x > 1) return -1.0 / 0.0;
+    if (x < -1.0 || x > 1.0) return NAN;
     double suma = x, termino = x;
     int n = 1;
     while (absoluto(termino) > EPSILON) {
@@ -169,12 +155,13 @@ namespace EngineMathLib {
         ((2.0 * n) * (2.0 * n + 1));
       suma += termino;
       ++n;
+      if (n > 1000) break;
     }
     return suma;
   }
 
   inline double arcCoseno(double x) {
-    return PI / 2 - arcSeno(x);
+    return PI / 2.0 - arcSeno(x);
   }
 
   inline double arcTangente(double x) {
@@ -184,6 +171,7 @@ namespace EngineMathLib {
       termino *= -x * x * (2.0 * n - 1) / (2.0 * n + 1);
       suma += termino;
       ++n;
+      if (n > 1000) break;
     }
     return suma;
   }
@@ -197,7 +185,7 @@ namespace EngineMathLib {
   }
 
   inline double tangenteHiperbolica(double x) {
-    double e2x = exponencial(2 * x);
+    double e2x = exponencial(2.0 * x);
     return (e2x - 1) / (e2x + 1);
   }
 
@@ -208,7 +196,7 @@ namespace EngineMathLib {
   }
 
   inline double perimetroCirculo(double radio) {
-    return 2 * PI * radio;
+    return 2.0 * PI * radio;
   }
 
   inline double areaRectangulo(double ancho, double alto) {
@@ -216,7 +204,7 @@ namespace EngineMathLib {
   }
 
   inline double perimetroRectangulo(double ancho, double alto) {
-    return 2 * (ancho + alto);
+    return 2.0 * (ancho + alto);
   }
 
   inline double areaTriangulo(double base, double altura) {
@@ -236,7 +224,7 @@ namespace EngineMathLib {
   }
 
   inline double factorial(int n) {
-    if (n < 0) return -1.0 / 0.0;
+    if (n < 0) return NAN;
     double resultado = 1.0;
     for (int i = 2; i <= n; ++i) {
       resultado *= i;
@@ -248,4 +236,4 @@ namespace EngineMathLib {
     return valorAbs(a - b) < epsilon;
   }
 
-} 
+}

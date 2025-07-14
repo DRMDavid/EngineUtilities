@@ -1,126 +1,311 @@
-﻿// CVector2.h - Vector 2D con operaciones básicas y utilidades
-
-
-#pragma once
+﻿#pragma once
 #include "../Utilities/EngineMath.h"
 #include <ostream>
 
-namespace EngineMath {
+namespace EngineMathLib {
 
-  /// Clase para representar un vector en 2D con operaciones matemáticas comunes.
+  /**
+   * @class CVector2
+   * @brief Representa un vector 2D con operaciones básicas y utilidades.
+   *
+   * La clase soporta operaciones aritméticas, comparaciones, normalización,
+   * cálculo de magnitud, producto punto y cruz, así como funciones estáticas
+   * útiles como distancia y interpolación lineal.
+   */
   class CVector2 {
   private:
-    float x, y;
+    double x; ///< Componente X del vector
+    double y; ///< Componente Y del vector
 
   public:
-    /// Constructor por defecto. Crea un vector (0, 0).
-    CVector2() : x(0), y(0) {}
+    // --- Constructores ---
 
-    /// Constructor con valores personalizados.
-    /// @param xVal Valor en el eje X.
-    /// @param yVal Valor en el eje Y.
-    CVector2(float xVal, float yVal) : x(xVal), y(yVal) {}
+    /**
+     * @brief Constructor por defecto que inicializa el vector a (0,0).
+     */
+    CVector2() : x(0.0), y(0.0) {}
+
+    /**
+     * @brief Constructor que inicializa el vector con valores específicos.
+     * @param xVal Valor para la componente X.
+     * @param yVal Valor para la componente Y.
+     */
+    CVector2(double xVal, double yVal) : x(xVal), y(yVal) {}
 
     // --- Operadores aritméticos ---
 
-    /// Suma dos vectores.
-    CVector2 operator+(const CVector2& o) const;
+    /**
+     * @brief Suma de vectores.
+     * @param o Vector a sumar.
+     * @return Nuevo vector resultado de la suma.
+     */
+    CVector2 operator+(const CVector2& o) const {
+      return CVector2(x + o.x, y + o.y);
+    }
 
-    /// Resta dos vectores.
-    CVector2 operator-(const CVector2& o) const;
+    /**
+     * @brief Resta de vectores.
+     * @param o Vector a restar.
+     * @return Nuevo vector resultado de la resta.
+     */
+    CVector2 operator-(const CVector2& o) const {
+      return CVector2(x - o.x, y - o.y);
+    }
 
-    /// Multiplica el vector por un escalar.
-    CVector2 operator*(float escalar) const;
+    /**
+     * @brief Multiplicación por un escalar.
+     * @param escalar Valor escalar.
+     * @return Nuevo vector escalado.
+     */
+    CVector2 operator*(double escalar) const {
+      return CVector2(x * escalar, y * escalar);
+    }
 
-    /// Divide el vector entre un escalar.
-    CVector2 operator/(float escalar) const;
+    /**
+     * @brief División por un escalar.
+     * @param escalar Valor escalar.
+     * @return Nuevo vector dividido, o vector cero si el escalar es 0.
+     */
+    CVector2 operator/(double escalar) const {
+      return (escalar != 0.0) ? CVector2(x / escalar, y / escalar) : CVector2(0.0, 0.0);
+    }
 
-    // --- Asignaciones compuestas ---
+    // --- Asignación compuesta ---
 
-    /// Suma otro vector al actual.
-    CVector2& operator+=(const CVector2& o);
+    /**
+     * @brief Suma y asigna otro vector.
+     * @param o Vector a sumar.
+     * @return Referencia al vector modificado.
+     */
+    CVector2& operator+=(const CVector2& o) {
+      x += o.x; y += o.y; return *this;
+    }
 
-    /// Resta otro vector al actual.
-    CVector2& operator-=(const CVector2& o);
+    /**
+     * @brief Resta y asigna otro vector.
+     * @param o Vector a restar.
+     * @return Referencia al vector modificado.
+     */
+    CVector2& operator-=(const CVector2& o) {
+      x -= o.x; y -= o.y; return *this;
+    }
 
-    /// Multiplica el vector actual por un escalar.
-    CVector2& operator*=(float escalar);
+    /**
+     * @brief Multiplica y asigna por un escalar.
+     * @param escalar Valor escalar.
+     * @return Referencia al vector modificado.
+     */
+    CVector2& operator*=(double escalar) {
+      x *= escalar; y *= escalar; return *this;
+    }
 
-    /// Divide el vector actual entre un escalar.
-    CVector2& operator/=(float escalar);
+    /**
+     * @brief Divide y asigna por un escalar.
+     * @param escalar Valor escalar.
+     * @return Referencia al vector modificado.
+     */
+    CVector2& operator/=(double escalar) {
+      if (escalar != 0.0) { x /= escalar; y /= escalar; }
+      return *this;
+    }
 
     // --- Comparaciones ---
 
-    /// Compara si dos vectores son aproximadamente iguales.
-    bool operator==(const CVector2& o) const;
+    /**
+     * @brief Compara igualdad aproximada con otro vector.
+     * @param o Vector para comparar.
+     * @return true si ambos vectores son iguales dentro de una tolerancia.
+     */
+    bool operator==(const CVector2& o) const {
+      return EngineMathLib::iguales(x, o.x) && EngineMathLib::iguales(y, o.y);
+    }
 
-    /// Compara si dos vectores son diferentes.
-    bool operator!=(const CVector2& o) const;
+    /**
+     * @brief Compara desigualdad con otro vector.
+     * @param o Vector para comparar.
+     * @return true si los vectores son diferentes.
+     */
+    bool operator!=(const CVector2& o) const {
+      return !(*this == o);
+    }
 
     // --- Acceso por índice ---
 
-    /// Accede a una componente por índice (0: X, 1: Y).
-    float& operator[](int i);
+    /**
+     * @brief Acceso mutable a componentes por índice (0 = x, 1 = y).
+     * @param i Índice (0 o 1).
+     * @return Referencia a la componente correspondiente.
+     */
+    double& operator[](int i) {
+      return (i == 0) ? x : y;
+    }
 
-    /// Accede a una componente por índice (0: X, 1: Y) (versión constante).
-    const float& operator[](int i) const;
+    /**
+     * @brief Acceso constante a componentes por índice (0 = x, 1 = y).
+     * @param i Índice (0 o 1).
+     * @return Referencia constante a la componente correspondiente.
+     */
+    const double& operator[](int i) const {
+      return (i == 0) ? x : y;
+    }
 
     // --- Magnitud y operaciones vectoriales ---
 
-    /// Retorna la longitud al cuadrado del vector.
-    float lengthSquare() const;
+    /**
+     * @brief Calcula el cuadrado de la longitud del vector.
+     * @return Suma de los cuadrados de las componentes.
+     */
+    double lengthSquare() const {
+      return x * x + y * y;
+    }
 
-    /// Retorna la magnitud (longitud) del vector.
-    float length() const;
+    /**
+     * @brief Calcula la longitud (magnitud) del vector.
+     * @return Raíz cuadrada de la suma de los cuadrados de las componentes.
+     */
+    double length() const {
+      return EngineMathLib::raizCuadrada(lengthSquare());
+    }
 
-    /// Calcula el producto punto entre dos vectores.
-    float dot(const CVector2& o) const;
+    /**
+     * @brief Producto punto con otro vector.
+     * @param o Vector con el cual calcular el producto punto.
+     * @return Escalar resultado del producto punto.
+     */
+    double dot(const CVector2& o) const {
+      return x * o.x + y * o.y;
+    }
 
-    /// Calcula el producto cruzado escalar (z) entre dos vectores 2D.
-    float cross(const CVector2& o) const;
+    /**
+     * @brief Producto cruzado (escalares en 2D).
+     * @param o Vector con el cual calcular el producto cruzado.
+     * @return Escalar resultado del producto cruzado.
+     */
+    double cross(const CVector2& o) const {
+      return x * o.y - y * o.x;
+    }
 
-    /// Retorna una copia normalizada del vector (longitud = 1).
-    CVector2 normalized() const;
+    /**
+     * @brief Retorna un vector normalizado (longitud 1).
+     * @return Vector normalizado, o vector cero si la longitud es 0.
+     */
+    CVector2 normalized() const {
+      double len = length();
+      return (len > 0.0) ? (*this / len) : CVector2(0.0, 0.0);
+    }
 
-    /// Normaliza el vector actual (lo convierte en unitario).
-    void normalize();
+    /**
+     * @brief Normaliza el vector actual (lo hace unitario).
+     */
+    void normalize() {
+      double len = length();
+      if (len > 0.0) {
+        x /= len;
+        y /= len;
+      }
+    }
 
     // --- Funciones estáticas ---
 
-    /// Calcula la distancia entre dos vectores.
-    static float distance(const CVector2& a, const CVector2& b);
+    /**
+     * @brief Calcula la distancia euclidiana entre dos vectores.
+     * @param a Primer vector.
+     * @param b Segundo vector.
+     * @return Distancia entre ambos vectores.
+     */
+    static double distance(const CVector2& a, const CVector2& b) {
+      return EngineMathLib::distancia(a.x, a.y, b.x, b.y);
+    }
 
-    /// Realiza una interpolación lineal entre dos vectores.
-    /// @param t Valor entre 0 y 1.
-    static CVector2 lerp(const CVector2& a, const CVector2& b, float t);
+    /**
+     * @brief Interpolación lineal entre dos vectores.
+     * @param a Vector inicial.
+     * @param b Vector final.
+     * @param t Parámetro de interpolación entre 0 y 1.
+     * @return Vector interpolado.
+     */
+    static CVector2 lerp(const CVector2& a, const CVector2& b, double t) {
+      return CVector2(
+        EngineMathLib::interpolacion(a.x, b.x, t),
+        EngineMathLib::interpolacion(a.y, b.y, t)
+      );
+    }
 
-    /// Retorna el vector (0, 0).
-    static CVector2 zero();
+    /**
+     * @brief Vector nulo (0,0).
+     * @return Vector con ambas componentes en cero.
+     */
+    static CVector2 zero() {
+      return CVector2(0.0, 0.0);
+    }
 
-    /// Retorna el vector (1, 1).
-    static CVector2 one();
+    /**
+     * @brief Vector con ambas componentes en uno (1,1).
+     * @return Vector con ambas componentes en uno.
+     */
+    static CVector2 one() {
+      return CVector2(1.0, 1.0);
+    }
 
-    // --- Manipulación del vector ---
+    // --- Transformaciones ---
 
-    /// Asigna una nueva posición al vector.
-    void setPosition(const CVector2& pos);
+    /**
+     * @brief Establece la posición del vector.
+     * @param pos Vector con la posición deseada.
+     */
+    void setPosition(const CVector2& pos) {
+      x = pos.x;
+      y = pos.y;
+    }
 
-    /// Desplaza el vector por un desplazamiento dado.
-    void move(const CVector2& offset);
+    /**
+     * @brief Mueve el vector por un desplazamiento.
+     * @param offset Vector que indica el desplazamiento.
+     */
+    void move(const CVector2& offset) {
+      x += offset.x;
+      y += offset.y;
+    }
 
-    /// Escala el vector usando factores dados.
-    void setScale(const CVector2& factors);
+    /**
+     * @brief Establece la escala del vector.
+     * @param factors Vector con los factores de escala para cada componente.
+     */
+    void setScale(const CVector2& factors) {
+      x = factors.x;
+      y = factors.y;
+    }
 
-    /// Escala el vector multiplicando por factores dados.
-    void scale(const CVector2& factors);
+    /**
+     * @brief Escala el vector multiplicando por factores.
+     * @param factors Vector con los factores de escala para cada componente.
+     */
+    void scale(const CVector2& factors) {
+      x *= factors.x;
+      y *= factors.y;
+    }
 
-    /// Asigna un nuevo origen al vector.
-    void setOrigin(const CVector2& origin);
+    /**
+     * @brief Establece el origen del vector.
+     * @param origin Vector con la posición del origen.
+     */
+    void setOrigin(const CVector2& origin) {
+      x = origin.x;
+      y = origin.y;
+    }
 
-    // --- Impresión del vector ---
+    // --- Impresión ---
 
-    /// Imprime el vector en la consola en formato CVector2(x, y).
-    friend std::ostream& operator<<(std::ostream& os, const CVector2& v);
+    /**
+     * @brief Sobrecarga del operador de inserción para salida a streams.
+     * @param os Stream de salida.
+     * @param v Vector a imprimir.
+     * @return Referencia al stream de salida.
+     */
+    friend std::ostream& operator<<(std::ostream& os, const CVector2& v) {
+      os << "CVector2(" << v.x << ", " << v.y << ")";
+      return os;
+    }
   };
 
-} 
+}
